@@ -1,7 +1,10 @@
 import praw
 import configparser
+import sys
+sys.path.append('~/repos/RedditThread_ETL')
+from utils.redis_util import RedisConnection
 
-path_to_secrets = '/home/cissy/repos/RedditThread_ETL/secrets.ini'
+path_to_secrets = '~/repos/RedditThread_ETL/secrets.ini'
 
 config = configparser.ConfigParser()
 config.read(path_to_secrets)
