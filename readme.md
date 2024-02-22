@@ -41,21 +41,24 @@ These instructions will get you a copy of the project up and running on your loc
 
 ### Installation
 1. Clone the Repository
+```python
     git clone https://github.com/hsy2014/RedditThread_ETL.git
     cd RedditThread_ETL
+```
 
 2. Set Up Reddit API Credentials
 * Obtain your Reddit API client_id and client_secret by creating an application a [Reddit's Developer API Portal](https://www.reddit.com/wiki/api/)
 
 * Create a secrets.ini file in the project root with your credentials:
+```python
     [reddit_cred]
     client_id=YOUR_CLIENT_ID
     client_secret=YOUR_CLIENT_SECRET
-
+```
 
 ### Project Structure
-- **`Scripts/`**: Contains the main Reddit Thread_ETL code.
-- **`utils/`**: Hold utility functions and constants.
+- **`Scripts`**: Contains the main Reddit Thread_ETL code.
+- **`utils`**: Hold utility functions and constants.
 
 ## Contribution
 Contributions to improve the project are welcome. Please follow these steps:
