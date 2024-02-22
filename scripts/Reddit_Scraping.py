@@ -49,14 +49,13 @@ class RedditToRedis:
 
     def update_posts_to_redis(self):
         """
-        Fetches posts from a predefined subreddit, 
-        checks for duplicates in Redis, and stores the IDs of new, 
-        unique posts to ensure efficient data management and prevent data redundancy.
+        Fetches posts from a predefined subreddit, checks for duplicates in Redis, 
+        and stores the IDs of new and unique posts.
 
         """
         redis_unique_postids = self.redis_connection.get_all_post_ids()
         postids_to_add = set()
-        
+
         for submission in self.reddit.subreddit(self.subreddit_name).hot(limit=self.limit):
             if submission.id not in redis_unique_postids:
                 postids_to_add.add(submission.id)
