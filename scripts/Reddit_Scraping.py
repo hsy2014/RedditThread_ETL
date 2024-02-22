@@ -24,7 +24,16 @@ class RedditToRedis:
 
     def _init_reddit_client(self, path_to_secrets, user_agent):
         """
-        Initializes the Reddit client using credentials from the config file.
+        Initializes the Reddit client with credentials obtained 
+        from a configuration file and returns an instance of the client.
+
+        Parameters:
+        - path_to_secrets (str): Path to the configuration file with Reddit credentials. 
+                This file should be in ini format.
+        - user_agent (str): A string that identifies the application making requests to the Reddit API. 
+
+        Return:
+        - praw.Reddit instance: An initialized Reddit client object ready for making API requests. 
         """
         config = configparser.ConfigParser()
         config.read(path_to_secrets)
@@ -40,11 +49,14 @@ class RedditToRedis:
 
     def update_posts_to_redis(self):
         """
-        Fetches posts from the subreddit, checks for duplicates in Redis, and stores new unique post IDs.
+        Fetches posts from a predefined subreddit, 
+        checks for duplicates in Redis, and stores the IDs of new, 
+        unique posts to ensure efficient data management and prevent data redundancy.
+
         """
         redis_unique_postids = self.redis_connection.get_all_post_ids()
         postids_to_add = set()
-
+        
         for submission in self.reddit.subreddit(self.subreddit_name).hot(limit=self.limit):
             if submission.id not in redis_unique_postids:
                 postids_to_add.add(submission.id)

@@ -89,10 +89,10 @@ These instructions will get you a copy of the project up and running on your loc
         from redis_util import RedisConnection
 
         # Initialize with default parameters
-        redis_conn = RedisConnection()
+        redis_connection = RedisConnection()
 
         # Or initialize with custom parameters
-        redis_conn = RedisConnection(host='your_host', port=your_port, db=your_db, set_name='your_set_name')
+        redis_connection = RedisConnection(host='your_host', port=your_port, db=your_db, set_name='your_set_name')
     ```
 
 ## Contribution
