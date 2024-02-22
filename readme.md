@@ -39,7 +39,7 @@ These instructions will get you a copy of the project up and running on your loc
 * Data Processing Libraries: Pandas for data manipulation, NLTK or spaCy for text processing (if needed).
 * Data Storage: My SQL, SQL database, NoSQL database, data lake, **[Redis](https://redis.io/)**
 
-### Installation
+### Set-Up
 1. Clone the Repository
 ```python
     git clone https://github.com/hsy2014/RedditThread_ETL.git
@@ -55,6 +55,17 @@ These instructions will get you a copy of the project up and running on your loc
     client_id=YOUR_CLIENT_ID
     client_secret=YOUR_CLIENT_SECRET
 ```
+3. Open a project Directory
+```python
+    cd path\to\your\project
+```
+
+4. create a virtual environment to execute all the program
+```python
+    virtualenv new_venv
+    source new_venv/bin/activate
+```
+
 
 ### Project Structure
 - **`Scripts`**: Contains the main Reddit Thread_ETL code.
@@ -68,6 +79,21 @@ These instructions will get you a copy of the project up and running on your loc
             * The submission is recognized as already processed.
             * The pipeline skips adding this submission to MongoDB to prevent duplicates.
 - **`utils`**: Hold utility functions and constants.
+    - The **RedisConnection** class provides a simple interface to interact with a Redis data store, specifically tailored to handle Reddit post IDs for an ETL pipeline.
+        - Establish a connection to a Redis server.
+        - Add new post IDs to a Redis set.
+        - Remove post IDs from a Redis set.
+        - Retrieve all post IDs stored in a Redis set.
+    - **Initialization**
+    ```python
+        from redis_util import RedisConnection
+
+        # Initialize with default parameters
+        redis_conn = RedisConnection()
+
+        # Or initialize with custom parameters
+        redis_conn = RedisConnection(host='your_host', port=your_port, db=your_db, set_name='your_set_name')
+    ```
 
 ## Contribution
 Contributions to improve the project are welcome. Please follow these steps:
