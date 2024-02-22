@@ -16,7 +16,7 @@ class RedisConnection:
         self.host = host 
         self.db = db
         self.port = port
-        self.client = redis.Redis(host=self.host, port=self.port, db=self.db)
+        self.client = redis.Redis(host=self.host, port=self.port, db=self.db, decode_responses=True)
         self.set_name = set_name
         try:
             self.client.ping()
@@ -34,7 +34,8 @@ class RedisConnection:
         """
         if not isinstance(post_ids, set):
             raise TypeError("post_ids must be provided as a set.")
-        self.client.sadd(self.set_name, *post_ids)
+        added_cnt = self.client.sadd(self.set_name, *post_ids)
+        print(f"Added {added_cnt} to {self.set_name}")
 
 
     def remove_post_ids(self, post_ids=None):
@@ -49,9 +50,17 @@ class RedisConnection:
             Return: None. 
         """
         if post_ids is None:
-            self.client.delete(self.set_name)
+            print(f"You are about to drop entire {self.set_name}: [Yes/No]")
+            choice = input().lower()
+            if choice.lower() == 'yes':
+                delete_indicator = self.client.delete(self.set_name)
+                if delete_indicator:
+                    print("Successfully removed the entire set")
+                else:
+                    print("No such set exists")
         elif isinstance(post_ids, set):
-            self.client.srem(self.set_name, *post_ids)
+            remove_cnt = self.client.srem(self.set_name, *post_ids)
+            print(f"Remove {remove_cnt} from {self.set_name}")
         else:
             raise TypeError("post_ids must be provided as a set or None to remove all.")
             
@@ -66,8 +75,11 @@ class RedisConnection:
         """
        
         return self.client.smembers(self.set_name)
+
             
 
 if __name__ == "__main__":
-    test_connection = RedisConnection()
-    test_connection.add_post_ids("cissy")
+    test_connection = RedisConnection(set_name="reddit_test")
+    test_connection.add_postids({"cissy", "haha"})
+    # test_connection.remove_post_ids()
+    print(test_connection.get_all_post_ids())
