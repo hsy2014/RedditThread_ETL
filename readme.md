@@ -64,9 +64,9 @@ These instructions will get you a copy of the project up and running on your loc
 Contributions to improve the project are welcome. Please follow these steps:
 
 * Fork the repository.
-* Create a new branch (git checkout -b new-branch).
-* Commit your changes (git commit -am 'Add some feature').
-* Push to the branch (git push origin new-branch).
+* Create a new branch (**git checkout -b new-branch**).
+* Commit your changes (**git commit -am 'Add some feature'**).
+* Push to the branch (**git push origin new-branch**).
 * Open a Pull Request.
 
 ## Authors
