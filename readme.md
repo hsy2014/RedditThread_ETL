@@ -49,7 +49,7 @@ These instructions will get you a copy of the project up and running on your loc
 2. Set Up Reddit API Credentials
 * Obtain your Reddit API client_id and client_secret by creating an application a [Reddit's Developer API Portal](https://www.reddit.com/wiki/api/)
 
-* Create a secrets.ini file in the project root with your credentials:
+* Create a **secrets.ini** file in the project root with your credentials:
 ```python
     [reddit_cred]
     client_id=YOUR_CLIENT_ID
@@ -64,9 +64,9 @@ These instructions will get you a copy of the project up and running on your loc
 Contributions to improve the project are welcome. Please follow these steps:
 
 * Fork the repository.
-* Create a new branch (git checkout -b new-branch).
-* Commit your changes (git commit -am 'Add some feature').
-* Push to the branch (git push origin new-branch).
+* Create a new branch (**git checkout -b new-branch**).
+* Commit your changes (**git commit -am 'Add some feature'**).
+* Push to the branch (**git push origin new-branch**).
 * Open a Pull Request.
 
 ## Authors

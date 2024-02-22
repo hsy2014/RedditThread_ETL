@@ -1,10 +1,11 @@
 import praw
 import configparser
 import sys
-sys.path.append('~/repos/RedditThread_ETL')
-from utils.redis_util import RedisConnection
+sys.path.append('/home/cissy/repos/RedditThread_ETL/utils')
 
-path_to_secrets = '~/repos/RedditThread_ETL/secrets.ini'
+from redis_util import RedisConnection
+
+path_to_secrets = '/home/cissy/repos/RedditThread_ETL/secrets.ini'
 
 config = configparser.ConfigParser()
 config.read(path_to_secrets)
@@ -18,6 +19,17 @@ reddit = praw.Reddit(
     user_agent="test_agent",
 )
 
+redis_connection = RedisConnection()
+
+# get all reddit unique ids from redis
+redis_unique_postids = redis_connection.get_all_post_ids()
+postids_toadd = set()
 for submission in reddit.subreddit("datascience").hot(limit=10):
     # print(submission.title) 
-    print(submission.id) # id we are going to use for duplication check
+    # print(submission.id) # id we are going to use for duplication check
+    if submission.id not in redis_unique_postids:
+        postids_toadd.add(submission.id)
+
+    if postids_toadd:
+        redis_connection.add_postids(postids_toadd)
+
