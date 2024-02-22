@@ -60,13 +60,13 @@ These instructions will get you a copy of the project up and running on your loc
 - **`Scripts`**: Contains the main Reddit Thread_ETL code.
     - **`Reddit_scrapping`**: 
         Check Redis for Submission ID: Each fetched submission's ID is checked against a list of IDs stored in Redis t0 determine if it has been processed before.
-             **If Submission ID is Not in Redis:**
-                * The submission is considered new.
-                * The new submission's data is added to the MongoDB database for persistent storage.
-                * The new submission ID is then added to Redis to mark it as processed.
-            **If Submission ID is in Redis:**
-                * The submission is recognized as already processed.
-                * The pipeline skips adding this submission to MongoDB to prevent duplicates.
+        **If Submission ID is Not in Redis:**
+        * The submission is considered new.
+        * The new submission's data is added to the MongoDB database for persistent storage.
+        * The new submission ID is then added to Redis to mark it as processed.
+        **If Submission ID is in Redis:**
+        * The submission is recognized as already processed.
+        * The pipeline skips adding this submission to MongoDB to prevent duplicates.
 - **`utils`**: Hold utility functions and constants.
 
 ## Contribution
