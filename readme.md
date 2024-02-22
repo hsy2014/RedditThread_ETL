@@ -49,7 +49,7 @@ These instructions will get you a copy of the project up and running on your loc
 2. Set Up Reddit API Credentials
 * Obtain your Reddit API client_id and client_secret by creating an application a [Reddit's Developer API Portal](https://www.reddit.com/wiki/api/)
 
-* Create a secrets.ini file in the project root with your credentials:
+* Create a **secrets.ini** file in the project root with your credentials:
 ```python
     [reddit_cred]
     client_id=YOUR_CLIENT_ID
