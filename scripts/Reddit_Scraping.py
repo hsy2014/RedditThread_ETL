@@ -1,76 +1,73 @@
 import praw
 import configparser
 import sys
+from datetime import datetime
 sys.path.append('/home/cissy/repos/RedditThread_ETL/utils')
 
-from redis_util import RedisConnection 
+from redis_util import RedisConnection
+from mongodb_util import MongodbConnection
 
-class RedditToRedis:
-    def __init__(self, path_to_secrets, subreddit_name, limit=10, user_agent="test_agent"):
-        """
-        Initializes the RedditToRedis instance with subreddit and limit for fetching posts,
-        and sets up the Reddit and Redis clients using provided credentials.
+path_to_secrets = '/home/cissy/repos/RedditThread_ETL/secrets.ini'
 
-        Parameters:
-        - path_to_secrets: Path to the configuration file with Reddit credentials.
-        - subreddit_name: Name of the subreddit to scrape.
-        - limit: Number of posts to fetch. Defaults to 10.
-        - user_agent: User agent for Reddit API requests.
-        """
-        self.subreddit_name = subreddit_name
-        self.limit = limit
-        self.reddit = self._init_reddit_client(path_to_secrets, user_agent)
-        self.redis_connection = RedisConnection()
+config = configparser.ConfigParser()
+config.read(path_to_secrets)
+reddit_client_id = config["reddit_cred"]["client_id"]
+reddit_client_secret = config["reddit_cred"]["client_secret"]
 
-    def _init_reddit_client(self, path_to_secrets, user_agent):
-        """
-        Initializes the Reddit client with credentials obtained 
-        from a configuration file and returns an instance of the client.
 
-        Parameters:
-        - path_to_secrets (str): Path to the configuration file with Reddit credentials. 
-                This file should be in ini format.
-        - user_agent (str): A string that identifies the application making requests to the Reddit API. 
+reddit = praw.Reddit(
+    client_id=reddit_client_id,
+    client_secret=reddit_client_secret,
+    user_agent="test_agent",
+)
 
-        Return:
-        - praw.Reddit instance: An initialized Reddit client object ready for making API requests. 
-        """
-        config = configparser.ConfigParser()
-        config.read(path_to_secrets)
-        reddit_client_id = config["reddit_cred"]["client_id"]
-        reddit_client_secret = config["reddit_cred"]["client_secret"]
-        return praw.Reddit(
-            client_id=reddit_client_id,
-            client_secret=reddit_client_secret,
-            user_agent="test_agent",
-            )
-        
-     
 
-    def update_posts_to_redis(self):
-        """
-        Fetches posts from a predefined subreddit, checks for duplicates in Redis, 
-        and stores the IDs of new and unique posts.
 
-        """
-        redis_unique_postids = self.redis_connection.get_all_post_ids()
-        postids_to_add = set()
+def update_subreddit_post(subredit_name,user_name,password,db=0,set_name='reddit_post',limit=10,
+                          db_name="RedditThread_Titles",col_name = "thread_collection"):
+    """
+     Updating a MongoDB collection with new subreddit posts while ensuring that duplicates are not added 
+     by leveraging a Redis set for fast duplication checks
 
-        for submission in self.reddit.subreddit(self.subreddit_name).hot(limit=self.limit):
-            if submission.id not in redis_unique_postids:
-                postids_to_add.add(submission.id)
+     Parameters:
+     - subredit_name: The name of the subreddit from which to retrieve posts.
+     - user_name: MongoDB user name (not in email form).
+     - password: MongoDB password associated with the user name.
+     - db: The Redis database index to use (default is 0).
+     - set_name: The name of the Redis set used to store and check for unique post IDs (default is 'reddit_post').
+     - limit: The maximum number of hot posts to retrieve from the subreddit (default is 10).
+     - db_name: The name of the MongoDB database where subreddit posts will be stored (default is "RedditThread_Titles").
+     - col_name: The name of the MongoDB collection within the database where posts will be stored (default is "thread_collection").
+    """
+    redis_connection = RedisConnection(db=db,set_name=set_name)
+    mongo_connection = MongodbConnection(user_name=user_name,password=password,db_name=db_name,col_name=col_name)
+    dup_check = 0
 
-        if postids_to_add:
-            self.redis_connection.add_postids(postids_to_add)
-            print(f"Added {len(postids_to_add)} new post IDs to Redis.")
-        else:
-            print("No new posts to add.")
+    # get all reddit unique ids from redis
+    redis_unique_postids = redis_connection.get_all_post_ids()
+    postids_toadd = set()
+    submissions_list=[]
 
-# Example usage
+    for submission in reddit.subreddit(subredit_name).hot(limit=limit):
+        # print(submission.title) 
+        # print(submission.id) # id we are going to use for duplication check
+        if submission.id not in redis_unique_postids:
+            submissions_list.append({"submission_id": submission.id, "submission_title": submission.title})
+            postids_toadd.add(submission.id)
+            
+    if postids_toadd:
+        dup_check = 1
+        document = {
+                "timestamp": datetime.utcnow(),
+                "RedditTopic": subredit_name,
+                "submissions": submissions_list,
+                "db_duplicated_checked": dup_check
+            }
+        mongo_connection.insert_doc(document)
+        redis_connection.add_postids(postids_toadd)
+
+
+
 if __name__ == "__main__":
-
-    # Load Reddit credentials from a configuration file
-    path_to_secrets = '/home/cissy/repos/RedditThread_ETL/secrets.ini'
-    subreddit_name = "datascience" 
-    reddit_to_redis = RedditToRedis(path_to_secrets=path_to_secrets, subreddit_name=subreddit_name)
-    reddit_to_redis.update_posts_to_redis()
+    update_subreddit_post(db=0,set_name="data_science",subredit_name="datascience",limit=20,
+                          user_name="shuyanhuang2014",password="Kx825123!")
