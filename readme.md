@@ -3,12 +3,12 @@ The primary goal of this project is to create a scalable and efficient pipeline 
 
 ## Table of contents
 - [Objectives](#Objectives)
-    - [Project Scope](#Scope_of_the_project)
-- [Getting Started](#Getting_Started)
+    - [Project Scope](#Scope-of-the-project)
+- [Getting Started](#Getting-Started)
     - [Prerequisites](#prerequisites)
-    - [Tools](#Tools_needed_for_this_project)
+    - [Tools](#Tools-needed-for-this-project)
     - [System Setup](#system-setup)
-    - [Project Structure](#Project_Structure)
+    - [Project Structure](#Project-Structure)
 
 ## Objectives
 
