@@ -1,8 +1,18 @@
 # Reddit Pipeline ETL project
+The primary goal of this project is to create a scalable and efficient pipeline that automates the extraction, transformation, and loading of Reddit data into a format that is ready for analysis.
+
+## Table of contents
+- [Objectives](#Objectives)
+    - [Project Scope](#Scope_of_the_project)
+- [Getting Started](#Getting_Started)
+    - [Prerequisites](#prerequisites)
+    - [Tools](#Tools_needed_for_this_project)
+    - [System Setup](#system-setup)
+    - [Project Structure](#Project_Structure)
 
 ## Objectives
 
-The primary goal of this project is to create a scalable and efficient pipeline that automates the extraction, transformation, and loading of Reddit data into a format that is ready for analysis. This involves:
+. This involves:
 
 * Extracting data from Reddit using Reddit's API or a third-party data source.
 * Transforming the raw data to clean, organize, and prepare it for analysis. This may include removing duplicates, handling missing values, and structuring the data into a suitable format.
@@ -39,14 +49,14 @@ These instructions will get you a copy of the project up and running on your loc
 * Data Processing Libraries: Pandas for data manipulation, NLTK or spaCy for text processing (if needed).
 * Data Storage: My SQL, SQL database, NoSQL database, data lake, **[Redis](https://redis.io/)**
 
-### Set-Up
-1. Clone the Repository
+### System Setup
+1. Clone the Repository.
 ```python
     git clone https://github.com/hsy2014/RedditThread_ETL.git
     cd RedditThread_ETL
 ```
 
-2. Set Up Reddit API Credentials
+2. Set Up Reddit API Credentials.
 * Obtain your Reddit API client_id and client_secret by creating an application a [Reddit's Developer API Portal](https://www.reddit.com/wiki/api/)
 
 * Create a **secrets.ini** file in the project root with your credentials:
@@ -55,16 +65,23 @@ These instructions will get you a copy of the project up and running on your loc
     client_id=YOUR_CLIENT_ID
     client_secret=YOUR_CLIENT_SECRET
 ```
-3. Open a project Directory
+3. Open a project Directory.
 ```python
     cd path\to\your\project
 ```
 
-4. create a virtual environment to execute all the program
+4. create a virtual environment to execute all the program.
 ```python
     virtualenv new_venv
     source new_venv/bin/activate
 ```
+
+5. Install the dependencies.
+```python
+    pip install -r requirements.txt
+```
+
+
 
 
 ### Project Structure
@@ -93,6 +110,18 @@ These instructions will get you a copy of the project up and running on your loc
 
         # Or initialize with custom parameters
         redis_connection = RedisConnection(host='your_host', port=your_port, db=your_db, set_name='your_set_name')
+    ```
+    - The **MongodbConnection** class provides an easy way to connect to a MongoDB database, create databases and collections, insert documents, and query or delete them.
+        - Establish a connection to MongoDB using credentials.
+        - Automatically create a database and collection if they don't exist.
+        - Insert single or multiple documents into a collection.
+        - Find documents with optional query filters, with support for finding a single document or limiting the number of documents returned.
+        - Delete documents based on a query, with an option to delete only the first document matching the criteria.
+    - **Initialization**
+    ```python
+        from pymongo import MongoClient
+        
+        mongo_connection = MongodbConnection(user_name="your_username", password="your_password")
     ```
 
 ## Contribution
