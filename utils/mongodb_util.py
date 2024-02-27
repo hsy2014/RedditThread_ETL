@@ -1,50 +1,37 @@
 from pymongo import MongoClient
+import configparser
+from difflib import SequenceMatcher
+
+path_to_secrets = '/home/cissy/repos/RedditThread_ETL/secrets.ini'
+
+config = configparser.ConfigParser()
+config.read(path_to_secrets)
+mongo_user = config["mongodb_cred"]["mongo_user"]
+mongo_secret = config["mongodb_cred"]["mongo_secret"]
 
 class MongodbConnection:
 
-    def __init__(self,user_name,password,db_name="RedditThread_Titles",col_name = "thread_collection"):
+    def __init__(self,db_name,col_name):
         """
         Initialize a MongoDB connection with specific parameters. Created databse and collection.
-        It checks if the specified database and collection exist based on user input, 
-        it can create them if they don't.
+        Insert a test case to initialize the database and collection.
 
         Parameters:
-        - user_name: MongoDB user name (not in email form)
-        - password: MangoDB password associated with user name
         - db_name: Name of your database
         - col_name: Name of your collection
         """
-        self.user_name = user_name
-        self.password = password
-        self.conn_str = f"mongodb+srv://{self.user_name}:{self.password}@cluster0.pzr6ccn.mongodb.net/?retryWrites=true&w=majority&appName=Cluster0"
-        self.mongo_Conn = MongoClient(self.conn_str)
-        self.db_name = db_name
-        self.col_name = col_name
+        self.conn_str = f"mongodb+srv://{mongo_user}:{mongo_secret}@cluster0.pzr6ccn.mongodb.net/?retryWrites=true&w=majority&appName=Cluster0"
+        try:
+            self.mongo_Conn = MongoClient(self.conn_str)
+            # Directly use the specified db_name and col_name
+            self.db_name = self.mongo_Conn[db_name]
+            self.col_name = self.db_name[col_name]
+            # Example document to insert if you need to verify the creation
+            self.col_name.insert_one({"init": "initDocument"})
+            print(f"Successfully connected to MongoDB at db:{self.db_name}, collection: {self.col_name}")
+        except Exception as e:
+            print(f"Error connecting to MongoDB: {e}")
 
-        db_list = self.mongo_Conn.list_database_names()
-        db_col_list = self.mongo_Conn[self.db_name].list_collection_names()
-
-        if self.db_name not in db_list:
-            print(f"No database named '{self.db_name}' exist.\
-                   Creating database '{self.db_name}' and \
-                    collection '{self.col_name}': [Yes/No]")
-            choice = input().lower()   
-            if choice.lower() == 'yes':
-                self.mydb=self.mongo_Conn[self.db_name]
-                self.mycol = self.mydb[self.col_name]
-                print(f"Successfully create database '{self.db_name}' and collection '{self.col_name}'")
-            else:
-                print("Please enter a valid database name")
-                
-        elif self.col_name in db_col_list:
-            self.mydb=self.mongo_Conn[self.db_name]
-            self.mycol = self.mydb[self.col_name]
-            print(f"The collection '{self.col_name}' and the database '{self.db_name}' already existed.")
-
-        else:
-            self.mydb=self.mongo_Conn[self.db_name]
-            self.mycol = self.mydb[self.col_name]
-            print("Collection created")
 
 
     def insert_doc(self,documents):
@@ -54,14 +41,21 @@ class MongodbConnection:
         Parameters:
         - documents: The document(s) to be inserted into the collection. 
         """
-        if isinstance(documents, (dict, set)):
-            result = self.mycol.insert_one(documents)
+        test_case_exists = self.col_name.find_one({"init": "initDocument"})
+        
+        if test_case_exists:
+            self.col_name.delete_many({"init": "initDocument"})
+            print("Test case removed successfully.")
+
+        if isinstance(documents, dict):
+            result = self.col_name.insert_one(documents)
             print("Insert one document successfully")
         elif isinstance(documents, list):
-            result = self.mycol.insert_many(documents)
+            result = self.col_name.insert_many(documents)
             print("Insert many documents successfully")
         else:
             print("Error: Insertion failed.")
+
 
     def find_doc(self,query=None, find_one=False, limit = None):
         """
@@ -76,29 +70,30 @@ class MongodbConnection:
             This parameter is ignored if find_one is True. Defaults to None, which means no limit.
 
         return:
-        - Print the found document(s) or a message indicating no matches directly to the console.
+        - list of found document(s) or a message indicating no matches directly to the console.
         """
         if find_one:
             # Find a single document based on the query
-            document = self.mycol.find_one(query)
-            if document:
-                return print(document)
-            else:
-                return print("No document matches the query.")
+            document = self.col_name.find_one(query)
+            if not document:
+                print("No document matches the query.")
+            return document
         else:
-            documents = self.mycol.find(query)
+            documents = self.col_name.find(query)
             # Attempt to limit the results if limit is specified
             if limit is not None:
                 documents = documents.limit(limit)
-            
             # Convert cursor to list to evaluate its size
             documents_list = [doc for doc in documents]
             
-            # Check if the list is empty
-            if documents_list:
-                return print(documents_list)
-            else:
-                return print("No documents match the query.")
+            # # Check if the list is empty
+            # if documents_list:
+            #     return print(documents_list)
+            # else:
+            #     print(f'documents are {documents_list}')
+            #     print("No documents match the query.")
+
+            return documents_list
                 
 
     def del_doc(self,query=None, del_one=False):
@@ -117,38 +112,45 @@ class MongodbConnection:
         """
         if del_one:
             # Find a single document based on the query
-            document = self.mycol.delete_one(query)
-            if document:
-                return print(f"{document.deleted_count} has been deleted")
+            del_obj = self.col_name.delete_one(query)
+            if del_obj:
+                print(f"{del_obj.deleted_count} has been deleted")
         else:
             # Find all documents matching the query
-            documents = self.mycol.delete_many(query)
-            if documents:
-                return print(f"{documents.deleted_count} has been deleted")
+            del_obj = self.col_name.delete_many(query)
+            if del_obj:
+                print(f"{del_obj.deleted_count} has been deleted")
+
+def get_mongDB_connection():
+    mongo_connection = MongodbConnection(db_name="RedditThread_Titles",col_name = "thread_collection")
+    return mongo_connection
 
 
 if __name__ == "__main__":
-    mongo_connection = MongodbConnection(user_name="shuyanhuang2014",password="Kx825123!")
-    mylist = [
-    { "name": "Amy", "address": "Apple st 652"},
-    { "name": "Hannah", "address": "Mountain 21"},
-    { "name": "Michael", "address": "Valley 345"},
-    { "name": "Sandy", "address": "Ocean blvd 2"},
-    { "name": "Betty", "address": "Green Grass 1"},
-    { "name": "Richard", "address": "Sky st 331"},
-    { "name": "Susan", "address": "One way 98"},
-    { "name": "Vicky", "address": "Yellow Garden 2"},
-    { "name": "Ben", "address": "Park Lane 38"},
-    { "name": "William", "address": "Central st 954"},
-    { "name": "Chuck", "address": "Main Road 989"},
-    { "name": "Viola", "address": "Sideway 1633"}
-    ]
-    mydict = { "name": "John", "address": "Highway 37", "pets": ["cat", "dog"], "friend": {"name": "cissy"}}
-    mytest = { "name": "Michael", "address": "Valley 345"}
-    #mongo_connection.insert_doc(mydict)
-    mongo_connection.find_doc(query=mytest,find_one=False,limit=1)
-    #print(mongo_connection.mongo_Conn[dbs_name][db_collection])
+    mongo_connection = MongodbConnection()
+    # mylist = [
+    # { "name": "Amy", "address": "Apple st 652"},
+    # { "name": "Hannah", "address": "Mountain 21"},
+    # { "name": "Michael", "address": "Valley 345"},
+    # { "name": "Sandy", "address": "Ocean blvd 2"},
+    # { "name": "Betty", "address": "Green Grass 1"},
+    # { "name": "Richard", "address": "Sky st 331"},
+    # { "name": "Susan", "address": "One way 98"},
+    # { "name": "Vicky", "address": "Yellow Garden 2"},
+    # { "name": "Ben", "address": "Park Lane 38"},
+    # { "name": "William", "address": "Central st 954"},
+    # { "name": "Chuck", "address": "Main Road 989"},
+    # { "name": "Viola", "address": "Sideway 1633"}
+    # ]
+    # mydict = { "name": "John", "address": "Highway 37", "pets": ["cat", "dog"], "friend": {"name": "cissy"}}
+    # mytest = { "name": "Michael", "address": "Valley 345"}
+    # test_2 = {"name": "yokoo"}
+    # #mongo_connection.insert_doc(mydict)
+    # # print(mongo_connection.find_doc(query=test_2,find_one=True, limit=1))
+    # #print(mongo_connection.mongo_Conn[dbs_name][db_collection])
+    # print(mongo_connection.del_doc(query=test_2))
     
+
 
 
 
