@@ -1,4 +1,14 @@
 import redis
+import configparser
+import praw
+
+path_to_secrets = '/home/cissy/repos/RedditThread_ETL/secrets.ini'
+
+config = configparser.ConfigParser()
+config.read(path_to_secrets)
+reddit_client_id = config["reddit_cred"]["client_id"]
+reddit_client_secret = config["reddit_cred"]["client_secret"]
+
 
 class RedisConnection:
 
@@ -79,6 +89,15 @@ class RedisConnection:
 def get_redis_connection():
     redis_connection = RedisConnection(db=0, set_name='reddit_post')
     return redis_connection
+
+def get_reddit_connection():
+    reddit = praw.Reddit(
+            client_id=reddit_client_id,
+            client_secret=reddit_client_secret,
+            user_agent="test_agent",
+            )
+    print("Connect to Reddit")
+    return reddit
         
 
 if __name__ == "__main__":
