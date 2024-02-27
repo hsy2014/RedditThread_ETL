@@ -11,27 +11,40 @@ mongo_secret = config["mongodb_cred"]["mongo_secret"]
 
 class MongodbConnection:
 
-    def __init__(self,db_name,col_name):
+    def __init__(self,db_name="RedditThread_Titles",col_name = "thread_collection"):
         """
         Initialize a MongoDB connection with specific parameters. Created databse and collection.
-        Insert a test case to initialize the database and collection.
+        It checks if the specified database and collection exist based on user input, 
+        it can create them if they don't.
 
         Parameters:
         - db_name: Name of your database
         - col_name: Name of your collection
         """
         self.conn_str = f"mongodb+srv://{mongo_user}:{mongo_secret}@cluster0.pzr6ccn.mongodb.net/?retryWrites=true&w=majority&appName=Cluster0"
+        self.mongo_Conn = MongoClient(self.conn_str)
+        self.db = db_name
+        self.col = col_name
+        self.db_name = self.mongo_Conn[self.db]
+        self.col_name = self.db_name[self.col]
+
+        # db_list = self.mongo_Conn.list_database_names()
+        # db_col_list = self.mongo_Conn[self.db_name].list_collection_names()
+
         try:
-            self.mongo_Conn = MongoClient(self.conn_str)
-            # Directly use the specified db_name and col_name
-            self.db_name = self.mongo_Conn[db_name]
-            self.col_name = self.db_name[col_name]
-            # Example document to insert if you need to verify the creation
-            self.col_name.insert_one({"init": "initDocument"})
-            print(f"Successfully connected to MongoDB at db:{self.db_name}, collection: {self.col_name}")
+            if self.db not in self.mongo_Conn.list_database_names():
+                # If the database does not exist, it's safe to insert the initialization document
+                print("Database does not exist. Creating and initializing with a test document.")
+                self.col_name.insert_one({"init": "initDocument"})
+            elif self.col not in self.db_name.list_collection_names():
+                # If the database exists but the collection does not, insert the initialization document
+                print("Collection does not exist. Creating and initializing with a test document.")
+                self.col_name.insert_one({"init": "initDocument"})
+            else:
+                # Both the database and collection exist, no need to insert the initialization document
+                print("Database and collection already exist. No initialization document inserted.")
         except Exception as e:
             print(f"Error connecting to MongoDB: {e}")
-
 
 
     def insert_doc(self,documents):
@@ -49,10 +62,10 @@ class MongodbConnection:
 
         if isinstance(documents, dict):
             result = self.col_name.insert_one(documents)
-            print("Insert one document successfully")
+            print("1 has been inserted")
         elif isinstance(documents, list):
             result = self.col_name.insert_many(documents)
-            print("Insert many documents successfully")
+            print(f"{len(x.inserted_ids)} has been inserted")
         else:
             print("Error: Insertion failed.")
 
@@ -127,7 +140,7 @@ def get_mongDB_connection():
 
 
 if __name__ == "__main__":
-    mongo_connection = MongodbConnection()
+    mongo_connection = get_mongDB_connection()
     # mylist = [
     # { "name": "Amy", "address": "Apple st 652"},
     # { "name": "Hannah", "address": "Mountain 21"},

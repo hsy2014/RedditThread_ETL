@@ -1,25 +1,12 @@
 import praw
-import configparser
 import sys
 from datetime import datetime
 sys.path.append('/home/cissy/repos/RedditThread_ETL/utils')
 
-from redis_util import RedisConnection,get_redis_connection
-from mongodb_util import MongodbConnection,get_mongDB_connection
-
-path_to_secrets = '/home/cissy/repos/RedditThread_ETL/secrets.ini'
-
-config = configparser.ConfigParser()
-config.read(path_to_secrets)
-reddit_client_id = config["reddit_cred"]["client_id"]
-reddit_client_secret = config["reddit_cred"]["client_secret"]
+from redis_util import get_redis_connection, get_reddit_connection
+from mongodb_util import get_mongDB_connection
 
 
-reddit = praw.Reddit(
-    client_id=reddit_client_id,
-    client_secret=reddit_client_secret,
-    user_agent="test_agent",
-)
 
 
 
@@ -40,13 +27,14 @@ def update_subreddit_post(subredit_name,limit=10):
     """
     redis_connection = get_redis_connection()
     mongo_connection = get_mongDB_connection()
+    reddit_connection = get_reddit_connection()
 
     # get all reddit unique ids from redis
     redis_unique_postids = redis_connection.get_all_post_ids()
     postids_toadd = set()
     submissions_list=[]
 
-    for submission in reddit.subreddit(subredit_name).hot(limit=limit):
+    for submission in reddit_connection.subreddit(subredit_name).hot(limit=limit):
         # print(submission.title) 
         # print(submission.id) # id we are going to use for duplication check
         if submission.id not in redis_unique_postids:
@@ -56,7 +44,7 @@ def update_subreddit_post(subredit_name,limit=10):
     if postids_toadd:
         dup_check = 1
         document = {
-                "timestamp": datetime.utcnow(),
+                "timestamp": datetime.now(),
                 "RedditTopic": subredit_name,
                 "submissions": submissions_list,
                 "db_duplicated_checked": dup_check
@@ -66,4 +54,4 @@ def update_subreddit_post(subredit_name,limit=10):
 
 
 if __name__ == "__main__":
-    update_subreddit_post(subredit_name="datascience",limit=20)
+    update_subreddit_post(subredit_name="math",limit=20)
