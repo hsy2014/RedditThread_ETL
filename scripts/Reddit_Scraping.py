@@ -54,4 +54,4 @@ def update_subreddit_post(subredit_name,limit=10):
 
 
 if __name__ == "__main__":
-    update_subreddit_post(subredit_name="math",limit=20)
+    update_subreddit_post(subredit_name="art",limit=20)

@@ -65,7 +65,7 @@ class MongodbConnection:
             print("1 has been inserted")
         elif isinstance(documents, list):
             result = self.col_name.insert_many(documents)
-            print(f"{len(x.inserted_ids)} has been inserted")
+            print(f"{len(result.inserted_ids)} has been inserted")
         else:
             print("Error: Insertion failed.")
 
