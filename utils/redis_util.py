@@ -2,7 +2,7 @@ import redis
 
 class RedisConnection:
 
-    def __init__(self, host='127.0.0.1', port=6379, db=0, set_name='reddit_post'):
+    def __init__(self,set_name, db=0,host='127.0.0.1', port=6379):
         """Objectivs: It initializes a new instance of the class with the necessary 
             configuration to connect to a Redis server and specifies the name of 
             the set where post_ids will be stored
@@ -76,10 +76,13 @@ class RedisConnection:
        
         return self.client.smembers(self.set_name)
 
-            
+def get_redis_connection():
+    redis_connection = RedisConnection(db=0, set_name='reddit_post')
+    return redis_connection
+        
 
 if __name__ == "__main__":
-    test_connection = RedisConnection(set_name="reddit_test")
+    test_connection = get_redis_connection()
     test_connection.add_postids({"cissy", "haha"})
     # test_connection.remove_post_ids()
     print(test_connection.get_all_post_ids())
