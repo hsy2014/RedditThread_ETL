@@ -37,7 +37,8 @@ These instructions will get you a copy of the project up and running on your loc
 * A PC that can run 24/7, at least 16GB + 500G hard disk
 * Reddit Developer account
 * Linux / Ubuntu 
-* Redis Python client
+* Redis
+* Airflow
 
 
 ### Tools needed for this project
@@ -80,8 +81,6 @@ These instructions will get you a copy of the project up and running on your loc
 ```python
     pip install -r requirements.txt
 ```
-
-
 
 
 ### Project Structure
