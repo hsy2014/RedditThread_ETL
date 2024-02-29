@@ -10,7 +10,7 @@ from mongodb_util import get_mongDB_connection
 
 
 
-def update_subreddit_post(subredit_name,limit=10):
+def update_subreddit_post(subredit_name,limit=20):
     """
      Updating a MongoDB collection with new subreddit posts while ensuring that duplicates are not added 
      by leveraging a Redis set for fast duplication checks
@@ -52,6 +52,12 @@ def update_subreddit_post(subredit_name,limit=10):
         mongo_connection.insert_doc(document)
         redis_connection.add_postids(postids_toadd)
 
+def run_update():
+    try:
+        reddit_thread_title = "datascience"
+        update_subreddit_post(reddit_thread_title)
+    except Exception as e:
+        print(f"Error: {e}")
 
 if __name__ == "__main__":
-    update_subreddit_post(subredit_name="art",limit=20)
+    run_update()
