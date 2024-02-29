@@ -1,11 +1,11 @@
 import datetime
 import pendulum
+import sys
+sys.path.append("/home/cissy/repos/RedditThread_ETL/scripts")
+from Reddit_Scraping import run_update
 
 from airflow import DAG
 from airflow.operators.python_operator import PythonOperator
-
-def call_my_script():
-    exec(open("/home/cissy/repos/RedditThread_ETL/scripts/Reddit_Scraping.py").read())
 
 
 with DAG(
@@ -17,6 +17,8 @@ with DAG(
     tags=["reddit_pipeline"],
 ) as dag:
         run_my_script = PythonOperator(
-        task_id='run_my_python_script',
-        python_callable=call_my_script,
+        task_id='Load_reddit_posts_to_mongoDB',
+        python_callable=run_update,
     )
+
+run_my_script
