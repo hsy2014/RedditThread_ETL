@@ -37,21 +37,33 @@ These instructions will get you a copy of the project up and running on your loc
 * A PC that can run 24/7, at least 16GB + 500G hard disk
 * **[Reddit Developer account](https://www.reddit.com/wiki/api/)**
 * **[Linux / Ubuntu](https://ubuntu.com/download/desktop)** (not necessary for MAC user)
+* **[Git](https://git-scm.com/downloads)**
 * **[Redis](https://redis.io/)**
+* **[RedisInsight](https://redis.com/redis-enterprise/redis-insight/)**
 * **[MongoDB Atlas](https://www.mongodb.com/atlas/database)**
-* **[Airflow](https://airflow.apache.org/docs/apache-airflow/stable/installation/index.html)**
+* **[Apache Airflow](https://airflow.apache.org/docs/apache-airflow/stable/installation/index.html)**
 * **[MySQL](https://www.mysql.com/downloads/)**
 * **[DBeaver](https://dbeaver.io/download/)**
+
+### Some Usefule Documentations
+* [Linux Command](https://ubuntu.com/tutorials/command-line-for-beginners#1-overview)
+* [Git Command](https://git-scm.com/docs)
+* [Redis](https://redis.io/commands/sadd/)
+* [RedisInsight](https://docs.redis.com/latest/ri/using-redisinsight/)
+* [MongoDB](https://www.w3schools.com/mongodb/index.php)
+* [Apache Airflow](https://airflow.apache.org/docs/apache-airflow/stable/index.html)
+* [SQL](https://www.w3schools.com/sql/default.asp)
+* [TextBlob](https://textblob.readthedocs.io/en/dev/)
 
 
 ### Tools needed for this project
 
 * Programming Languages: Python due to their extensive libraries and frameworks for data processing and API interactions.
-* APIs: **[Reddit API](https://www.reddit.com/wiki/api/)** for data extraction.
+* APIs: **Reddit API** for data extraction.
 * ETL Frameworks: **Apache Airflow**, Apache NiFi, or similar for orchestrating the ETL pipeline.
-* NoSQL: PostgreSQL, **MongoDB**, **[Redis](https://redis.io/)**, Amazon DynamoDB, etc.
+* NoSQL: PostgreSQL, **MongoDB**, **Redis**, Amazon DynamoDB, etc.
 * Data Orchestration: **Apache Airflow** 
-* Data Processing Libraries:**[TextBlob](https://textblob.readthedocs.io/en/dev/) for sentiment Analysis**, Pandas for data manipulation, NLTK or spaCy for text processing.
+* Data Processing Libraries:**TextBlob for sentiment Analysis**, Pandas for data manipulation, NLTK or spaCy for text processing.
 * Relational Database: **MySQL**, Microsoft SQL server,PostgreSQL, etc
 
 ### System Setup
@@ -99,12 +111,15 @@ These instructions will get you a copy of the project up and running on your loc
 ### Project Structure
 - **`Scripts`**: Contains the main Reddit Thread_ETL code.
     - **`Dags`**:
-        - **`DAG_reddit`**: The workflow is orchestrated using Apache Airflow, ensuring reliable scheduling and execution of the data pipeline.
+        - **`DAG_reddit`**: 
+            The workflow is orchestrated using Apache Airflow, ensuring reliable scheduling and execution of the data pipeline.
             - **Schedule**: Runs at midnight every day.
             - **Start Date**: February 28, 2024.
             - **Catchup**: False, to avoid backfilling past dates on startup.
             - **DAG Run Timeout**: 5 minutes, to prevent excessively long runs.
             - **Task**: `Load_reddit_posts_to_mongoDB` calls the `run_update` function to fetch and load of Reddit post data.
+    - **`sql`**: 
+        - **`create_table`**: contains SQL scripts for creating a MySQL database `RedditPost_DataScience` and tables `subreddit_topic`. It aimed at storing topics and used to sentiment analysis of Reddit posts related to Data Science.
 
     - **`Reddit_scrapping`**: 
         Check Redis for Submission ID: Each fetched submission's ID is checked against a list of IDs stored in Redis t0 determine if it has been processed before.
@@ -115,8 +130,10 @@ These instructions will get you a copy of the project up and running on your loc
         - **If Submission ID is in Redis:**
             * The submission is recognized as already processed.
             * The pipeline skips adding this submission to MongoDB to prevent duplicates.
-    - **`sql`**: 
-        - **`create_table`**: contains SQL scripts for creating a MySQL database `RedditPost_DataScience` and tables `subreddit_topic`. It aimed at storing topics and used to sentiment analysis of Reddit posts related to Data Science.
+
+    - **`email_notification`**:
+        `send_email_notification` for sending HTML email notifications regarding the success or failure of a data pipeline that inserts documents into a database from Reddit threads. 
+    
 
 - **`utils`**: Hold utility functions and constants.
     - The **RedisConnection** class provides a simple interface to interact with a Redis data store, specifically tailored to handle Reddit post IDs for an ETL pipeline.
