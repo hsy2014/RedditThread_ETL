@@ -13,7 +13,7 @@ with DAG(
     schedule="0 0 * * *",
     start_date=pendulum.datetime(2024, 2, 28, tz="EST"),
     catchup=False,
-    dagrun_timeout=datetime.timedelta(seconds=60),
+    dagrun_timeout=datetime.timedelta(minutes=5),
     tags=["reddit_pipeline"],
 ) as dag:
         run_my_script = PythonOperator(
