@@ -6,6 +6,7 @@ The primary goal of this project is to create a scalable and efficient pipeline 
     - [Project Scope](#Scope-of-the-project)
 - [Getting Started](#Getting-Started)
     - [Prerequisites](#prerequisites)
+    - [Resources](#Resources)
     - [Tools](#Tools-needed-for-this-project)
     - [System Setup](#system-setup)
     - [Project Structure](#Project-Structure)
@@ -45,7 +46,7 @@ These instructions will get you a copy of the project up and running on your loc
 * **[MySQL](https://www.mysql.com/downloads/)**
 * **[DBeaver](https://dbeaver.io/download/)**
 
-### Some Usefule Documentations
+### Resources
 * [Linux Command](https://ubuntu.com/tutorials/command-line-for-beginners#1-overview)
 * [Git Command](https://git-scm.com/docs)
 * [Redis](https://redis.io/commands/sadd/)
