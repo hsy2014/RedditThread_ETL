@@ -35,20 +35,24 @@ These instructions will get you a copy of the project up and running on your loc
 
 * Python 3.10
 * A PC that can run 24/7, at least 16GB + 500G hard disk
-* Reddit Developer account
-* Linux / Ubuntu 
-* Redis
-* Airflow
+* **[Reddit Developer account](https://www.reddit.com/wiki/api/)**
+* **[Linux / Ubuntu](https://ubuntu.com/download/desktop)** (not necessary for MAC user)
+* **[Redis](https://redis.io/)**
+* **[MongoDB Atlas](https://www.mongodb.com/atlas/database)**
+* **[Airflow](https://airflow.apache.org/docs/apache-airflow/stable/installation/index.html)**
+* **[MySQL](https://www.mysql.com/downloads/)**
+* **[DBeaver](https://dbeaver.io/download/)**
 
 
 ### Tools needed for this project
 
 * Programming Languages: Python due to their extensive libraries and frameworks for data processing and API interactions.
-* APIs: Reddit API for data extraction.
-* ETL Frameworks: Apache Airflow, Apache NiFi, or similar for orchestrating the ETL pipeline.
-* Databases/Data Warehouses: PostgreSQL, **MongoDB**, Amazon Redshift, or similar for data storage.
-* Data Processing Libraries: Pandas for data manipulation, NLTK or spaCy for text processing (if needed).
-* Data Storage: My SQL, SQL database, NoSQL database, data lake, **[Redis](https://redis.io/)**
+* APIs: **[Reddit API](https://www.reddit.com/wiki/api/)** for data extraction.
+* ETL Frameworks: **Apache Airflow**, Apache NiFi, or similar for orchestrating the ETL pipeline.
+* NoSQL: PostgreSQL, **MongoDB**, **[Redis](https://redis.io/)**, Amazon DynamoDB, etc.
+* Data Orchestration: **Apache Airflow** 
+* Data Processing Libraries:**[TextBlob](https://textblob.readthedocs.io/en/dev/) for sentiment Analysis**, Pandas for data manipulation, NLTK or spaCy for text processing.
+* Relational Database: **MySQL**, Microsoft SQL server,PostgreSQL, etc
 
 ### System Setup
 1. Clone the Repository.
@@ -65,6 +69,15 @@ These instructions will get you a copy of the project up and running on your loc
     [reddit_cred]
     client_id=YOUR_CLIENT_ID
     client_secret=YOUR_CLIENT_SECRET
+
+    [mongodb_cred]
+    mongo_user=YOUR_MONGODB_ID
+    mongo_secret=YOUR_MONGODB_SECRET
+
+    [email_cred]
+    email_account = YOUR_EMAIL_ADDRESS
+    email_password = YOUR_EMAIL_PASSWORD
+    smtp_server = YOUR_EMAIL_SERVER
 ```
 3. Open a project Directory.
 ```python
@@ -85,6 +98,14 @@ These instructions will get you a copy of the project up and running on your loc
 
 ### Project Structure
 - **`Scripts`**: Contains the main Reddit Thread_ETL code.
+    - **`Dags`**:
+        - **`DAG_reddit`**: The workflow is orchestrated using Apache Airflow, ensuring reliable scheduling and execution of the data pipeline.
+            - **Schedule**: Runs at midnight every day.
+            - **Start Date**: February 28, 2024.
+            - **Catchup**: False, to avoid backfilling past dates on startup.
+            - **DAG Run Timeout**: 5 minutes, to prevent excessively long runs.
+            - **Task**: `Load_reddit_posts_to_mongoDB` calls the `run_update` function to fetch and load of Reddit post data.
+
     - **`Reddit_scrapping`**: 
         Check Redis for Submission ID: Each fetched submission's ID is checked against a list of IDs stored in Redis t0 determine if it has been processed before.
         - **If Submission ID is Not in Redis:**
@@ -94,6 +115,9 @@ These instructions will get you a copy of the project up and running on your loc
         - **If Submission ID is in Redis:**
             * The submission is recognized as already processed.
             * The pipeline skips adding this submission to MongoDB to prevent duplicates.
+    - **`sql`**: 
+        - **`create_table`**: contains SQL scripts for creating a MySQL database `RedditPost_DataScience` and tables `subreddit_topic`. It aimed at storing topics and used to sentiment analysis of Reddit posts related to Data Science.
+
 - **`utils`**: Hold utility functions and constants.
     - The **RedisConnection** class provides a simple interface to interact with a Redis data store, specifically tailored to handle Reddit post IDs for an ETL pipeline.
         - Establish a connection to a Redis server.
@@ -130,7 +154,7 @@ Contributions to improve the project are welcome. Please follow these steps:
 * Create a new branch (**git checkout -b new-branch**).
 * Commit your changes (**git commit -am 'Add some feature'**).
 * Push to the branch (**git push origin new-branch**).
-* Open a Pull Request.
+* Open a pull Request.
 
 ## Authors
 * **Shuyan Huang** - **Inital Work**
