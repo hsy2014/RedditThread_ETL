@@ -1,6 +1,5 @@
 from pymongo import MongoClient
 import configparser
-from difflib import SequenceMatcher
 
 path_to_secrets = '/home/cissy/repos/RedditThread_ETL/secrets.ini'
 
