@@ -1,9 +1,8 @@
 # Reddit Pipeline ETL project
-The primary goal of this project is to create a scalable and efficient pipeline that automates the extraction, transformation, and loading of Reddit data into a format that is ready for analysis.
+The primary objective of the Reddit Sentiment Analysis project is to develop a robust and automated data pipeline that systematically extracts, transforms, and loads (ETL) Reddit posts related to specified topics into a structured database for sentiment analysis. This project aims to harness the vast amounts of unstructured data available on Reddit, turning it into actionable insights by analyzing the sentiment of posts within specific communities or topics, such as DataScience.
 
 ## Table of contents
-- [Objectives](#Objectives)
-    - [Project Scope](#Scope-of-the-project)
+- [Objectives](#Objectives-and-Scopes)
 - [Getting Started](#Getting-Started)
     - [Prerequisites](#prerequisites)
     - [Resources](#Resources)
@@ -11,21 +10,35 @@ The primary goal of this project is to create a scalable and efficient pipeline 
     - [System Setup](#system-setup)
     - [Project Structure](#Project-Structure)
 
-## Objectives
+## Objectives and Scopes
 
-. This involves:
+* **Data Extraction:**
+    * Automate the extraction of Reddit post data related to specified topics using `Reddit's API` or a third-party data source.
 
-* Extracting data from Reddit using Reddit's API or a third-party data source.
-* Transforming the raw data to clean, organize, and prepare it for analysis. This may include removing duplicates, handling missing values, and structuring the data into a suitable format.
-* Loading the transformed data into a database or data warehouse for easy access and analysis.
+* **Duplication Check and Redis Storage:**
+    * Implement a Redis-based caching mechanism to efficiently track and identify duplicate submissions, ensuring that each Reddit post is processed only once.
+    * Use `Redis`' key-value store capabilities to maintain a quick-access set of submission IDs, which aids in the rapid determination of new vs. previously processed posts.
 
-### Scope of the project
+* **MongoDB Storage for Detailed Information:**
+    * Store the detailed information of each unique Reddit submission in `MongoDB`, leveraging its flexible schema to accommodate the diverse structure of Reddit data.
+    * Design the `MongoDB` database to optimize for data retrieval and analysis, setting the foundation for the transformation process.
 
-* Selection of relevant data sources on Reddit, such as "Data Science" related threads are chosen in this case
-* Determination of the data extraction frequency (e.g., real-time, hourly, daily)
-* Definition of the data transformation processes needed to clean and structure the data.
-* Choice of storage solution (e.g., SQL database, NoSQL database, data lake, **[Redis](https://redis.io/)**) for the processed data.
-* Implementation of monitoring and logging to track the pipeline's performance and data quality.
+* **Sentiment Analysis and Data Transformation:**
+    * Perform sentiment analysis on the extracted Reddit posts to evaluate polarity and subjectivity, utilizing natural language processing (NLP) libraries such as `TextBlob`.
+    * Clean, organize, and prepare the raw data for analysis during the transformation phase. This includes structuring the data into a suitable format for sentiment analysis and further processing.
+
+* **SQL Database Integration:**
+    * Load the transformed and sentiment-analyzed data into a structured `MySQL` database, facilitating easy access, querying, and analysis of the sentiment data.
+    * Design the SQL schema to efficiently store and relate Reddit topics, posts, and their sentiment analysis results, ensuring data integrity and relational coherence.
+
+
+* **Automation with Apache Airflow:**
+    * Leverage `Apache Airflow` to automate the entire ETL pipeline, scheduling regular data extraction, processing, and loading tasks.
+    * Configure `Airflow DAGs` to manage the workflow, dependencies, and scheduling of tasks, ensuring reliable execution and timely updates of the data pipeline.
+
+* **Notification and Monitoring:**
+    * Implement `email notification systems` to alert administrators of pipeline successes, failures, or anomalies, enabling prompt response to issues.
+    * Monitor the health and performance of the ETL pipeline, adjusting parameters as necessary to optimize data processing and resource usage.
 
 
 ## Getting Started
@@ -132,8 +145,20 @@ These instructions will get you a copy of the project up and running on your loc
             * The submission is recognized as already processed.
             * The pipeline skips adding this submission to MongoDB to prevent duplicates.
 
-    - **`email_notification`**:
-        `send_email_notification` for sending HTML email notifications regarding the success or failure of a data pipeline that inserts documents into a database from Reddit threads. 
+    - **`Sentiment_Processing`**:
+        Fetch Reddit posts on specified topics (i.e. DataScience), analyze their sentiment, and store the results in a MySQL database.
+        - **If topic ID is not in MySQL:**
+            * A new record for the Reddit topic is created in the MySQL database. New created Topic ID is retrieved to associate new sentiment analysis results.
+            * Sentiment analysis is performed on submissions related to this new topic.
+            * Results are stored in the database.
+        - **If topic ID is in MySQL:**
+            * The Reddit topic is recognized as already existing in the database.
+            * The system retrieves the Topic ID for this existing topic to associate new sentiment analysis results.
+            * Performs sentiment analysis on new submissions under this topic, avoiding re-analysis of previously processed submissions.
+            * Updates the MySQL database with new sentiment analysis data, labelling with their Reddit topic.
+
+
+       
     
 
 - **`utils`**: Hold utility functions and constants.
@@ -152,6 +177,7 @@ These instructions will get you a copy of the project up and running on your loc
         # Or initialize with custom parameters
         redis_connection = RedisConnection(host='your_host', port=your_port, db=your_db, set_name='your_set_name')
     ```
+
     - The **MongodbConnection** class provides an easy way to connect to a MongoDB database, create databases and collections, insert documents, and query or delete them.
         - Establish a connection to MongoDB using credentials.
         - Automatically create a database and collection if they don't exist.
@@ -164,6 +190,29 @@ These instructions will get you a copy of the project up and running on your loc
         
         mongo_connection = MongodbConnection(user_name="your_username", password="your_password")
     ```
+
+    - The **mysqlconnection** class supports establishing connections.
+        - `get_mysql_connection()`Establishing connections to a MySQL database using specified credentials.
+        - `get_connection()` Establishes and returns a connection to the MySQL database.
+    - **Initialization**
+    ```python
+        import pymysql
+        
+        init_mysql_connection = mysqlconnection(user_name="your_username", password="your_password")
+        mysql_connection = init_mysql_connection.getconnection()
+    ```
+
+    - The **email_util**: Sends an email notification about the number of documents inserted or the number of SQL row updated
+        - `dbConnection_email`: Sends an email notification about the number of documents inserted or an error if occurred.
+        - `mysql_update_email`: Sends an email notification about the number of SQL row updated or an error if occurred.
+    - **import**
+    ```python
+
+        from email_util import mysql_update_email, dbConnection_email
+    
+    ```
+
+
 
 ## Contribution
 Contributions to improve the project are welcome. Please follow these steps:
