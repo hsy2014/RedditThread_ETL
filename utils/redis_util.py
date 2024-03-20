@@ -18,10 +18,10 @@ class RedisConnection:
             the set where post_ids will be stored
             
             Parameters:
-            host: The hostname or IP address of the Redis server. Defaults to '127.0.0.1'.
-            port: The port number on which the Redis server is connecting. The default Redis port is 6379.
-            db: This parameter selects which database to use. Default database is 0
-            set_name: The name of the Redis set where post_ids are stored. Default name is 'reddit_post'
+            - host: The hostname or IP address of the Redis server. Defaults to '127.0.0.1'.
+            - port: The port number on which the Redis server is connecting. The default Redis port is 6379.
+            - db: This parameter selects which database to use. Default database is 0
+            - set_name: The name of the Redis set where post_ids are stored. Default name is 'reddit_post'
         """
         self.host = host 
         self.db = db
@@ -38,7 +38,7 @@ class RedisConnection:
     def add_postids(self, post_ids: set) -> None:
         """Objectivs: Adds one or multiple post_ids to the specified Redis set.
             Parameters:
-            post_ids: A set of post_ids to add. 
+            - post_ids: A set of post_ids to add. 
 
             Return: None. 
         """
@@ -54,7 +54,7 @@ class RedisConnection:
             it deletes the entire set, removing all post_ids.
             
             Parameters:
-            post_ids: An optional parameter, if provided, should be a set of post_ids to remove.
+            - post_ids: An optional parameter, if provided, should be a set of post_ids to remove.
                 If None, the entire subreddit set is deleted. 
 
             Return: None. 
@@ -77,9 +77,6 @@ class RedisConnection:
 
     def get_all_post_ids(self):
         """Objectivs: Retrieves all post_ids currently stored in the subreddit set.
-            
-            Parameters:
-            None
 
             Return: Returns all the elements of the Redis set  
         """
@@ -100,8 +97,8 @@ def get_reddit_connection():
     return reddit
         
 
-if __name__ == "__main__":
-    test_connection = get_redis_connection()
-    test_connection.add_postids({"cissy", "haha"})
-    # test_connection.remove_post_ids()
-    print(test_connection.get_all_post_ids())
+# if __name__ == "__main__":
+#     test_connection = get_redis_connection()
+#     test_connection.add_postids({"cissy", "haha"})
+#     # test_connection.remove_post_ids()
+#     print(test_connection.get_all_post_ids())
