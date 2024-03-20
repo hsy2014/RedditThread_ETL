@@ -2,11 +2,11 @@ import praw
 import sys
 from datetime import datetime
 sys.path.append('/home/cissy/repos/RedditThread_ETL/utils')
-sys.path.append('/home/cissy/repos/RedditThread_ETL/scripts/email_notification.py')
+
 
 from redis_util import get_redis_connection, get_reddit_connection
 from mongodb_util import get_mongDB_connection
-from email_notification import send_email_notification
+from email_util import dbConnection_email
 
 
 
@@ -50,6 +50,7 @@ def update_subreddit_post(subredit_name,limit=20):
         dup_check = 1
         document = {
                 "timestamp": datetime.now(),
+                "date_loaded":str(datetime.now().date()),
                 "RedditTopic": subredit_name,
                 "submissions": submissions_list,
                 "db_duplicated_checked": dup_check
@@ -61,14 +62,14 @@ def update_subreddit_post(subredit_name,limit=20):
         print(f'{datetime.now()} run successful, there are 0 new posts to be found in {subredit_name}') 
     return new_posts_count
 
-def run_update():
+def redis_mongodb_update():
     try:
         reddit_thread_title = "datascience"
         post_added_cnt = update_subreddit_post(reddit_thread_title)
-        send_email_notification(inserted_docs_count = post_added_cnt,thread_title = reddit_thread_title)
+        dbConnection_email(inserted_docs_count = post_added_cnt,thread_title = reddit_thread_title)
     except Exception as e:
-        send_email_notification(0, reddit_thread_title, error=e)
+        dbConnection_email(0, reddit_thread_title, error=e)
         print(f"Error: {e}")
 
 if __name__ == "__main__":
-    run_update()
+    redis_mongodb_update()
